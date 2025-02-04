@@ -5,8 +5,8 @@ import { Axios } from './services/Axios.js';
 let photoData = ref([]);
 let searchQuery = ref("");
 let page = ref(1);
-let selectedImage = ref(null); // New state for selected image
-let isModalVisible = ref(false); // Modal visibility state
+let selectedImage = ref(null);
+let isPopupVisible = ref(false);
 
 const fetchImageData = async () => {
   page.value = 1;
@@ -54,11 +54,11 @@ const loadMoreImages = async () => {
 
 const openPopup = (photo) => {
   selectedImage.value = photo;
-  isModalVisible.value = true;
+  isPopupVisible.value = true;
 };
 
 const closePopup = () => {
-  isModalVisible.value = false;
+  isPopupVisible.value = false;
   selectedImage.value = null;
 };
 
@@ -92,7 +92,7 @@ onMounted(fetchImageData);
   </main>
 
 
-  <div v-if="isModalVisible" class="pop-up" @click="closePopup">
+  <div v-if="isPopupVisible" class="pop-up" @click="closePopup">
     <div class="pop-up-content" @click.stop>
       <div class="pop-up-header">
         <button class="close-pop-up" @click="closePopup">X</button>
