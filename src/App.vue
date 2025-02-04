@@ -11,7 +11,7 @@ let isModalVisible = ref(false); // Modal visibility state
 const fetchImageData = async () => {
   page.value = 1;
   try {
-    const response = await Axios.get('/photos/random', { params: { count: 16 } });
+    const response = await Axios.get('/photos/random', { params: { count: 8 } });
     photoData.value = response.data;
   } catch (error) {
     console.error('Error fetching images:', error);
@@ -19,11 +19,11 @@ const fetchImageData = async () => {
 };
 
 const fetchImageWithSearch = async () => {
-  if (!searchQuery.value) return null;
+  if (!searchQuery.value) return fetchImageData();
   page.value = 1;
   try {
     const response = await Axios.get('/search/photos', {
-      params: { query: searchQuery.value, page: page.value, count: 16 }
+      params: { query: searchQuery.value, page: page.value, count: 8 }
     });
     photoData.value = response.data.results || [];
   } catch (error) {
@@ -37,11 +37,11 @@ const loadMoreImages = async () => {
     let newData = [];
 
     if (!searchQuery.value) {
-      const response = await Axios.get('/photos/random', { params: { count: 16 } });
+      const response = await Axios.get('/photos/random', { params: { count: 8 } });
       newData = response.data || [];
     } else {
       const response = await Axios.get('/search/photos', {
-        params: { query: searchQuery.value, page: page.value, count: 16 }
+        params: { query: searchQuery.value, page: page.value, count: 8 }
       });
       newData = response.data.results || [];
     }
@@ -76,21 +76,26 @@ onMounted(fetchImageData);
       <button @click="fetchImageWithSearch">Search</button>
     </div>
 
-    <div v-if="photoData.length" id="image-grid">
+    <div v-if="photoData.length === 0">
+      <p class="show-error">Image not found</p>
+    </div>
+
+    <div v-if="photoData.length > 0" id="image-grid">
       <div v-for="photo in photoData" :key="photo.id" class="image-item" @click="openPopup(photo)">
         <img :src="photo.urls.small" :alt="photo.description || 'Image'" />
       </div>
     </div>
 
-    <div v-if="photoData.length">
+    <div v-if="photoData.length > 0">
       <button @click="loadMoreImages">Load More</button>
     </div>
   </main>
 
+
   <div v-if="isModalVisible" class="pop-up" @click="closePopup">
     <div class="pop-up-content" @click.stop>
       <div class="pop-up-header">
-      <button class="close-pop-up" @click="closePopup">X</button>
+        <button class="close-pop-up" @click="closePopup">X</button>
       </div>
       <img :src="selectedImage?.urls.full" :alt="selectedImage?.description || 'Full image'" />
     </div>
@@ -174,6 +179,11 @@ button:hover {
   opacity: 0.9;
 }
 
+.show-error{
+  width: 100%;
+  text-align: center;
+}
+
 .pop-up {
   height: 100%;
   position: fixed;
@@ -198,7 +208,7 @@ button:hover {
   text-align: center;
 }
 
-.pop-up-header{
+.pop-up-header {
   width: 100%;
   background: white;
   border-radius: 5px 5px 0px 0px;
@@ -206,7 +216,7 @@ button:hover {
 }
 
 .close-pop-up {
-  text-align:end;
+  text-align: end;
   right: 0;
   margin: 0;
   padding: 10px;
@@ -215,5 +225,4 @@ button:hover {
   border: none;
   cursor: pointer;
 }
-
 </style>
